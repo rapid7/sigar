@@ -59,6 +59,7 @@ TEST(test_sigar_sys_info_get) {
 	assert(sysinfo.vendor_version);
 	assert(sysinfo.vendor_name);
 	assert(sysinfo.vendor_code_name);
+	assert(sysinfo.uuid);
 
 	return 0;
 }

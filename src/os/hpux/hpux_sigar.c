@@ -625,6 +625,11 @@ int sigar_file_system_list_get(sigar_t *sigar,
     return SIGAR_OK;
 }
 
+int sigar_sys_info_get_uuid(sigar_t *sigar, char uuid[SIGAR_SYS_INFO_LEN])
+{
+    return SIGAR_ENOTIMPL;
+}
+
 static int create_fsdev_cache(sigar_t *sigar)
 {
     sigar_file_system_list_t fslist;

@@ -3069,10 +3069,48 @@ static int get_linux_vendor_info(sigar_sys_info_t *info)
 int sigar_os_sys_info_get(sigar_t *sigar,
                           sigar_sys_info_t *sysinfo)
 {
-
     get_linux_vendor_info(sysinfo);
 
     return SIGAR_OK;
+}
+
+int sigar_sys_info_get_uuid(sigar_t *sigar, char uuid[SIGAR_SYS_INFO_LEN])
+{
+    int found = 0;
+    memset(uuid, 0, SIGAR_SYS_INFO_LEN);
+
+    /* TODO: query for this through dbus api */
+    FILE *fp = fopen("/etc/machine-id", "r");
+    if (fp) {
+        if (fgets(uuid, SIGAR_SYS_INFO_LEN - 1, fp)) {
+            found = 1;
+        }
+        fclose(fp);
+    } else {
+        /*
+         * fall back on disk uuid. We would prefer to use the 36 character UUID
+         * typical of hard disks, but the 22 character one used by iso9660
+         * devices will do for now. Most systems will use the dbus machine id
+         * as is.
+         */
+        DIR *ctx = opendir("/dev/disk/by-uuid");
+
+        if (ctx) {
+            struct dirent *data;
+            while ((data = readdir(ctx)) != NULL) {
+                const char *fs_uuid = data->d_name;
+                if (strlen(data->d_name) == 36 || strlen(data->d_name) == 22) {
+                    strncat(uuid, fs_uuid, SIGAR_SYS_INFO_LEN - strlen(fs_uuid) - 1);
+                    /* the first one encountered will suffice */
+                    found = 1;
+                    break;
+                }
+            }
+            closedir(ctx);
+        }
+    }
+
+    return found ? SIGAR_OK : SIGAR_FIELD_NOTIMPL;
 }
 
 /*

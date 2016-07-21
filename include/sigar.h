@@ -982,9 +982,13 @@ typedef struct {
     char vendor_version[SIGAR_SYS_INFO_LEN];
     char vendor_name[SIGAR_SYS_INFO_LEN];  /* utsname.sysname */
     char vendor_code_name[SIGAR_SYS_INFO_LEN];
+    char uuid[SIGAR_SYS_INFO_LEN];
 } sigar_sys_info_t;
 
 SIGAR_DECLARE(int) sigar_sys_info_get(sigar_t *sigar, sigar_sys_info_t *sysinfo);
+
+SIGAR_DECLARE(int) sigar_sys_info_get_uuid(sigar_t *sigar,
+                                           char uuid[SIGAR_SYS_INFO_LEN]);
 
 #define SIGAR_FQDN_LEN 512
 

@@ -245,6 +245,11 @@ char *sigar_os_error_string(sigar_t *sigar, int err)
     }
 }
 
+int sigar_sys_info_get_uuid(sigar_t *sigar, char uuid[SIGAR_SYS_INFO_LEN])
+{
+    return SIGAR_ENOTIMPL;
+}
+
 #define PAGESHIFT(v) \
     ((v) << sigar->pagesize)
 

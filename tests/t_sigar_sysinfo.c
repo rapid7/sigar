@@ -66,7 +66,7 @@ TEST(test_sigar_sys_info_get) {
 int main() {
 	sigar_t *t;
 	int err = 0;
-	
+
 	assert(SIGAR_OK == sigar_open(&t));
 
 	test_sigar_sys_info_get(t);

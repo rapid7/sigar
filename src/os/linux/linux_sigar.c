@@ -52,18 +52,18 @@ static char *gMOUNTED;
 
 static void set_proc_locations()
 {
-	sigar_proc_path(&gPROC_FS_ROOT,    PROC_FS_ROOT, NULL);
-	sigar_proc_path(&gPROCP_FS_ROOT,   PROCP_FS_ROOT, NULL);
-	sigar_proc_path(&gPROC_MEMINFO,    PROC_FS_ROOT, "meminfo");
-	sigar_proc_path(&gPROC_VMSTAT,     PROC_FS_ROOT, "vmstat");
-	sigar_proc_path(&gPROC_MTRR,       PROC_FS_ROOT, "mtrr");
-	sigar_proc_path(&gPROC_STAT,       PROC_FS_ROOT, "stat");
-	sigar_proc_path(&gPROC_UPTIME,     PROC_FS_ROOT, "uptime");
-	sigar_proc_path(&gPROC_LOADAVG,    PROC_FS_ROOT, "loadavg");
-	sigar_proc_path(&gPROC_DISKSTATS,  PROC_FS_ROOT, "diskstats");
-	sigar_proc_path(&gPROC_PARTITIONS, PROC_FS_ROOT, "partitions");
-	sigar_proc_path(&gSYS_BLOCK,       NULL,         "/sys/block");
-	sigar_proc_path(&gMOUNTED,         NULL,         MOUNTED);
+    sigar_proc_path(&gPROC_FS_ROOT,    PROC_FS_ROOT, NULL);
+    sigar_proc_path(&gPROCP_FS_ROOT,   PROCP_FS_ROOT, NULL);
+    sigar_proc_path(&gPROC_MEMINFO,    PROC_FS_ROOT, "meminfo");
+    sigar_proc_path(&gPROC_VMSTAT,     PROC_FS_ROOT, "vmstat");
+    sigar_proc_path(&gPROC_MTRR,       PROC_FS_ROOT, "mtrr");
+    sigar_proc_path(&gPROC_STAT,       PROC_FS_ROOT, "stat");
+    sigar_proc_path(&gPROC_UPTIME,     PROC_FS_ROOT, "uptime");
+    sigar_proc_path(&gPROC_LOADAVG,    PROC_FS_ROOT, "loadavg");
+    sigar_proc_path(&gPROC_DISKSTATS,  PROC_FS_ROOT, "diskstats");
+    sigar_proc_path(&gPROC_PARTITIONS, PROC_FS_ROOT, "partitions");
+    sigar_proc_path(&gSYS_BLOCK,       NULL,         "/sys/block");
+    sigar_proc_path(&gMOUNTED,         NULL,         MOUNTED);
 }
 
 /*
@@ -1345,7 +1345,7 @@ static int get_iostat_proc_dstat(sigar_t *sigar,
     if (SIGAR_LOG_IS_DEBUG(sigar)) {
         sigar_log_printf(sigar, SIGAR_LOG_DEBUG,
             "%s  %s -> %s [%d,%d]",
-			gPROC_DISKSTATS,
+            gPROC_DISKSTATS,
             dirname, (*iodev)->name,
             ST_MAJOR(sb), ST_MINOR(sb));
     }
@@ -1660,12 +1660,11 @@ static int get_cpu_info(sigar_t *sigar, sigar_cpu_info_t *info,
 
     int found = 0;
 
-	/*
-	 * Make sure we don't put trash in here if we can't find
-	 * the field keywords.
-	 */
-
-	memset(info, 0, sizeof(*info));
+    /*
+     * Make sure we don't put trash in here if we can't find
+     * the field keywords.
+     */
+    memset(info, 0, sizeof(*info));
 
     /* UML vm wont have "cpu MHz" or "cache size" fields */
     info->mhz        = 0;
@@ -1677,7 +1676,7 @@ static int get_cpu_info(sigar_t *sigar, sigar_cpu_info_t *info,
 
     while ((ptr = fgets(buffer, sizeof(buffer), fp))) {
         switch (*ptr) {
-          case 'p': /* processor	: 0 */
+          case 'p': /* processor    : 0 */
             if (strnEQ(ptr, "processor", 9)) {
                 found = 1;
             }
@@ -1958,7 +1957,7 @@ int sigar_net_interface_stat_get(sigar_t *sigar, const char *name,
 
     /* skip headers */
 
-	int result = sigar_skip_file_lines(fp, 2);
+    int result = sigar_skip_file_lines(fp, 2);
 
     if (result != SIGAR_OK)
     {
@@ -2386,15 +2385,14 @@ int sigar_net_interface_ipv6_config_get(sigar_t *sigar, const char *name,
     return status;
 }
 
-SIGAR_DECLARE(int)
-sigar_net_connection_listeners_get(sigar_t *sigar,
-		sigar_net_connection_list_t *connlist)
+int sigar_net_connection_listeners_get(sigar_t *sigar,
+        sigar_net_connection_list_t *connlist)
 {
 
     int i, status;
 
     status = sigar_net_connection_list_get(sigar, connlist,
-			SIGAR_NETCONN_UDP | SIGAR_NETCONN_TCP | SIGAR_NETCONN_SERVER);
+            SIGAR_NETCONN_UDP | SIGAR_NETCONN_TCP | SIGAR_NETCONN_SERVER);
 
     if (status != SIGAR_OK) {
         return status;
@@ -2416,16 +2414,15 @@ sigar_net_connection_listeners_get(sigar_t *sigar,
 
 #define SNMP_TCP_PREFIX "Tcp: "
 
-SIGAR_DECLARE(int)
-sigar_tcp_get(sigar_t *sigar,
+int sigar_tcp_get(sigar_t *sigar,
               sigar_tcp_t *tcp)
 {
     FILE *fp;
     char buffer[1024], *ptr=buffer;
     int status = SIGAR_ENOENT;
-	static char *snmp_path;
+    static char *snmp_path;
 
-	sigar_proc_path(&snmp_path,  PROC_FS_ROOT, "net/snmp");
+    sigar_proc_path(&snmp_path,  PROC_FS_ROOT, "net/snmp");
 
     if (!(fp = fopen(snmp_path, "r"))) {
         return errno;
@@ -2581,9 +2578,9 @@ static int sigar_nfs_v3_get(char *file, sigar_nfs_v3_t *nfs)
 int sigar_nfs_client_v3_get(sigar_t *sigar,
                             sigar_nfs_client_v3_t *nfs)
 {
-	static char *nfs_path;
+    static char *nfs_path;
 
-	sigar_proc_path(&nfs_path,  PROC_FS_ROOT, "net/rpc/nfs");
+    sigar_proc_path(&nfs_path,  PROC_FS_ROOT, "net/rpc/nfs");
 
     return sigar_nfs_v3_get(nfs_path, (sigar_nfs_v3_t *)nfs);
 }
@@ -2591,9 +2588,9 @@ int sigar_nfs_client_v3_get(sigar_t *sigar,
 int sigar_nfs_server_v3_get(sigar_t *sigar,
                             sigar_nfs_server_v3_t *nfs)
 {
-	static char *nfsd_path;
+    static char *nfsd_path;
 
-	sigar_proc_path(&nfsd_path,  PROC_FS_ROOT, "net/rpc/nfsd");
+    sigar_proc_path(&nfsd_path,  PROC_FS_ROOT, "net/rpc/nfsd");
 
     return sigar_nfs_v3_get(nfsd_path, (sigar_nfs_v3_t *)nfs);
 }
@@ -3106,7 +3103,7 @@ int sigar_os_is_in_container(sigar_t *sigar)
     }
 
     while ((ptr = fgets(buffer, sizeof(buffer), fp))) {
-		// Hack check for opensuse.
+        // Hack check for opensuse.
         tmp_ptr = strstr(buffer, "=");
         if (tmp_ptr) {
             continue;

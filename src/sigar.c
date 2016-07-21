@@ -377,7 +377,7 @@ SIGAR_DECLARE(int) sigar_sys_info_get(sigar_t *sigar,
 
 #include <sys/utsname.h>
 
-int sigar_sys_info_get_uname(sigar_sys_info_t *sysinfo)
+SIGAR_DECLARE(int) sigar_sys_info_get_uname(sigar_sys_info_t *sysinfo)
 {
     struct utsname name;
 

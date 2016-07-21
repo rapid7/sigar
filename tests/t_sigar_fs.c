@@ -72,7 +72,8 @@ TEST(test_sigar_file_system_list_get) {
 			continue;
 		}
 
-		if (SIGAR_OK == (ret = sigar_file_system_usage_get(t, fs.dir_name, &fsusage))) {
+		ret = sigar_file_system_usage_get(t, fs.dir_name, &fsusage);
+		if (ret == SIGAR_OK) {
 			assert(IS_IMPL_U64(fsusage.total));
 			assert(IS_IMPL_U64(fsusage.free));
 			assert(IS_IMPL_U64(fsusage.used));
@@ -89,15 +90,18 @@ TEST(test_sigar_file_system_list_get) {
 			case ERROR_NOT_READY:
 				break;
 #endif
+			case EACCES:
+				break;
+
 			default:
 				fprintf(stderr, "sigar_file_system_usage_get(%s) ret = %d (%s)\n",
 						fs.dir_name,
 						ret, sigar_strerror(t, ret));
-				assert(ret == SIGAR_OK); 
+				assert(ret == SIGAR_OK);
 				break;
 			}
 		}
-	
+
 		if (SIGAR_OK == (ret = sigar_disk_usage_get(t, fs.dev_name, &diskusage))) {
 			assert(IS_IMPL_U64(diskusage.reads));
 			assert(IS_IMPL_U64(diskusage.writes));
@@ -124,7 +128,7 @@ TEST(test_sigar_file_system_list_get) {
 			assert(diskusage.queue >= 0);
 #endif
 		} else {
-			switch (ret) { 
+			switch (ret) {
 			case ESRCH: /* macosx */
 			case ENXIO: /* solaris */
 			case ENOENT: /* aix */
@@ -138,7 +142,7 @@ TEST(test_sigar_file_system_list_get) {
 				fprintf(stderr, "sigar_disk_usage_get(%s) ret = %d (%s)\n",
 						fs.dev_name,
 						ret, sigar_strerror(t, ret));
-				assert(ret == SIGAR_OK); 
+				assert(ret == SIGAR_OK);
 				break;
 			}
 		}
@@ -152,7 +156,7 @@ TEST(test_sigar_file_system_list_get) {
 int main() {
 	sigar_t *t;
 	int err = 0;
-	
+
 	assert(SIGAR_OK == sigar_open(&t));
 
 	test_sigar_file_system_list_get(t);

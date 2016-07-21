@@ -370,14 +370,7 @@ SIGAR_DECLARE(int) sigar_sys_info_get(sigar_t *sigar,
 
     sigar_os_sys_info_get(sigar, sysinfo);
 
-    sigar_net_info_t netinfo;
-    char uuid[SIGAR_SYS_INFO_LEN] = { 0 };
-
-    sigar_net_info_get(sigar, &netinfo);
-    sigar_sys_info_get_uuid(sigar, uuid);
-
-    snprintf(sysinfo->uuid, sizeof(sysinfo->uuid), "%s.%s:%s",
-             netinfo.host_name, netinfo.domain_name, uuid);
+    sigar_sys_info_get_uuid(sigar, sysinfo->uuid);
 
     return SIGAR_OK;
 }

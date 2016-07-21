@@ -3110,7 +3110,7 @@ int sigar_sys_info_get_uuid(sigar_t *sigar, char uuid[SIGAR_SYS_INFO_LEN])
         }
     }
 
-    return found ? SIGAR_OK : SIGAR_FIELD_NOTIMPL;
+    return found ? SIGAR_OK : SIGAR_ENOTIMPL;
 }
 
 /*

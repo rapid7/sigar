@@ -78,6 +78,17 @@ case $host_os in
      SRC_OS="win32"
      AC_DEFINE(SIGAR_TEST_OS_WIN32, [1], [for the tests])
      SIGAR_LIBS="-lws2_32 -liphlpapi -lnetapi32 -lversion -lole32 -loleaut32"
+	 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <windows.h>
+#include <ole2.h>
+#include <initguid.h>
+#include <wbemcli.h>
+]], [[
+GUID i = {0}, j = CLSID_WbemLocator; return memcmp(&i, &j, sizeof(i));
+]])],
+        [ AC_DEFINE([HAVE_WBEMLOCATOR], [1], []) ],
+        [],
+     )
      ;;
      *)
      ac_system="unknown"

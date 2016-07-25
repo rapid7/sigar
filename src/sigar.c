@@ -77,7 +77,13 @@ SIGAR_DECLARE(int) sigar_open(sigar_t **sigar)
         (*sigar)->net_listen = NULL;
         (*sigar)->net_services_tcp = NULL;
         (*sigar)->net_services_udp = NULL;
-	(*sigar)->proc_io = NULL;
+        (*sigar)->proc_io = NULL;
+    }
+
+    sigar_sys_info_t sysinfo;
+    status = sigar_sys_info_get(*sigar, &sysinfo);
+    if (status == SIGAR_OK) {
+        strcpy((*sigar)->arch, sysinfo.arch);
     }
 
     return status;

@@ -465,6 +465,7 @@ typedef struct {
     char name[SIGAR_PATH_MAX+1];
     char cwd[SIGAR_PATH_MAX+1];
     char root[SIGAR_PATH_MAX+1];
+    const char *arch;
 } sigar_proc_exe_t;
 
 SIGAR_DECLARE(int) sigar_proc_exe_get(sigar_t *sigar, sigar_pid_t pid,

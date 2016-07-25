@@ -177,6 +177,10 @@ char *sigar_get_self_path(sigar_t *sigar);
 int sigar_dlinfo_modules(sigar_t *sigar, sigar_proc_modules_t *procmods);
 #endif
 
+const char *sigar_elf_file_get_arch(const char *path);
+
+const char *sigar_elf_file_guess_arch(sigar_t *sigar, const char *path);
+
 typedef struct sigar_cache_entry_t sigar_cache_entry_t;
 
 struct sigar_cache_entry_t {

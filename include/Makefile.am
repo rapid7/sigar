@@ -8,4 +8,5 @@ include_HEADERS = \
 	sigar_util.h
 
 EXTRA_DIST=\
-	CMakeLists.txt
+	CMakeLists.txt \
+	machine/endian.h

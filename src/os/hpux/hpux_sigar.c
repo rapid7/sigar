@@ -490,34 +490,24 @@ int sigar_proc_fd_get(sigar_t *sigar, sigar_pid_t pid,
 int sigar_proc_exe_get(sigar_t *sigar, sigar_pid_t pid,
                        sigar_proc_exe_t *procexe)
 {
+    memset(procexe, 0, sizeof(*procexe));
 #ifdef __pst_fid /* 11.11+ */
     int rc;
     struct pst_status status;
 
-    if (pstat_getproc(&status, sizeof(status), 0, pid) == -1) {
-        return errno;
-    }
+    if (pstat_getproc(&status, sizeof(status), 0, pid) != -1) {
 
-    rc = pstat_getpathname(procexe->cwd,
-                           sizeof(procexe->cwd),
+        pstat_getpathname(procexe->cwd, sizeof(procexe->cwd),
                            &status.pst_fid_cdir);
-    if (rc == -1) {
-        return errno;
-    }
 
-    rc = pstat_getpathname(procexe->name,
-                           sizeof(procexe->name),
+        pstat_getpathname(procexe->name, sizeof(procexe->name),
                            &status.pst_fid_text);
-    if (rc == -1) {
-        return errno;
+
+        pstat_getpathname(procexe->root, sizeof(procexe->root),
+                           &status.pst_fid_rdir);
     }
 
-    rc = pstat_getpathname(procexe->root,
-                           sizeof(procexe->root),
-                           &status.pst_fid_rdir);
-    if (rc == -1) {
-        return errno;
-    }
+	procexe->arch = sigar_elf_file_guess_arch(sigar, procexe->name);
 
     return SIGAR_OK;
 #else

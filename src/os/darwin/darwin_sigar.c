@@ -1976,61 +1976,56 @@ int sigar_proc_fd_get(sigar_t *sigar, sigar_pid_t pid,
 int sigar_proc_exe_get(sigar_t *sigar, sigar_pid_t pid,
                        sigar_proc_exe_t *procexe)
 {
+    memset(procexe, 0, sizeof(*procexe));
+
 #ifdef DARWIN
     int status;
     sigar_kern_proc_args_t kargs;
 
     status = sigar_kern_proc_args_get(sigar, pid, procexe->name, &kargs);
-    if (status != SIGAR_OK) {
-        return status;
-    }
-
-    procexe->cwd[0] = '\0';
-    procexe->root[0] = '\0';
-
-    /* attempt to determine cwd from $PWD */
-    status = kern_proc_args_skip_argv(&kargs);
     if (status == SIGAR_OK) {
-        char *ptr = kargs.ptr;
-        char *end = kargs.end;
+        /* attempt to determine cwd from $PWD */
+        status = kern_proc_args_skip_argv(&kargs);
+        if (status == SIGAR_OK) {
+            char *ptr = kargs.ptr;
+            char *end = kargs.end;
 
-        /* into environ */
-        while (ptr < end) {
-            int len = strlen(ptr);
+            /* into environ */
+            while (ptr < end) {
+                int len = strlen(ptr);
 
-            if ((len > 4) &&
-                (ptr[0] == 'P') &&
-                (ptr[1] == 'W') &&
-                (ptr[2] == 'D') &&
-                (ptr[3] == '='))
-            {
-                memcpy(procexe->cwd, ptr+4, len-3);
-                break;
+                if ((len > 4) &&
+                    (ptr[0] == 'P') &&
+                    (ptr[1] == 'W') &&
+                    (ptr[2] == 'D') &&
+                    (ptr[3] == '='))
+                {
+                    memcpy(procexe->cwd, ptr+4, len-3);
+                    break;
+                }
+
+                ptr += len+1;
             }
-
-            ptr += len+1;
         }
+
+        sigar_kern_proc_args_destroy(&kargs);
     }
 
-    sigar_kern_proc_args_destroy(&kargs);
+    // XXX do we need to read mach-o, or is there a better way?
+    procexe->arch = sigar->arch;
 
     return SIGAR_OK;
 #else
     int len;
     char name[1024];
 
-    procexe->cwd[0] = '\0';
-    procexe->root[0] = '\0';
-
     (void)SIGAR_PROC_FILENAME(name, pid, "/file");
-
     if ((len = readlink(name, procexe->name,
-                        sizeof(procexe->name)-1)) < 0)
-    {
-        return PROCFS_STATUS(errno);
+                        sizeof(procexe->name)-1)) >= 0) {
+        procexe->name[len] = '\0';
     }
 
-    procexe->name[len] = '\0';
+	procexe->arch = sigar_elf_file_guess_arch(sigar, procexe->name);
 
     return SIGAR_OK;
 #endif

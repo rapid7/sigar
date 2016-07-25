@@ -13,6 +13,7 @@ libsigar_la_CFLAGS = -I$(top_srcdir)/include
 libsigar_la_SOURCES = \
 	sigar.c \
 	sigar_cache.c \
+	sigar_elf.c \
 	sigar_fileinfo.c \
 	sigar_format.c \
 	sigar_ptql.c \

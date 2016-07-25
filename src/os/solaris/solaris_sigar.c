@@ -1329,6 +1329,8 @@ static int sigar_proc_path_exe_get(sigar_t *sigar, sigar_pid_t pid,
         procexe->root[0] = '\0';
     }
 
+	procexe->arch = sigar_elf_file_guess_arch(sigar, procexe->name);
+
     return SIGAR_OK;
 }
 

@@ -59,6 +59,7 @@
    unsigned long version; \
    unsigned long boot_time; \
    int ticks; \
+   char arch[SIGAR_SYS_INFO_LEN]; \
    sigar_pid_t pid; \
    char errbuf[256]; \
    char *ifconf_buf; \

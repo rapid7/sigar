@@ -1080,35 +1080,27 @@ int sigar_proc_exe_get(sigar_t *sigar, sigar_pid_t pid,
     int len;
     char name[BUFSIZ];
 
+    memset(procexe, 0, sizeof(*procexe));
+
     (void)SIGAR_PROC_FILENAME(name, pid, "/cwd");
-
     if ((len = readlink(name, procexe->cwd,
-                        sizeof(procexe->cwd)-1)) < 0)
-    {
-        return errno;
+                        sizeof(procexe->cwd)-1)) >= 0) {
+        procexe->cwd[len] = '\0';
     }
-
-    procexe->cwd[len] = '\0';
 
     (void)SIGAR_PROC_FILENAME(name, pid, "/exe");
-
     if ((len = readlink(name, procexe->name,
-                        sizeof(procexe->name)-1)) < 0)
-    {
-        return errno;
+                        sizeof(procexe->name)-1)) >= 0) {
+        procexe->name[len] = '\0';
     }
-
-    procexe->name[len] = '\0';
 
     (void)SIGAR_PROC_FILENAME(name, pid, "/root");
-
     if ((len = readlink(name, procexe->root,
-                        sizeof(procexe->root)-1)) < 0)
-    {
-        return errno;
+                        sizeof(procexe->root)-1)) >= 0) {
+        procexe->root[len] = '\0';
     }
 
-    procexe->root[len] = '\0';
+	procexe->arch = sigar_elf_file_guess_arch(sigar, procexe->name);
 
     return SIGAR_OK;
 }

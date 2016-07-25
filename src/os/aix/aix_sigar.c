@@ -993,27 +993,24 @@ int sigar_proc_exe_get(sigar_t *sigar, sigar_pid_t pid,
     char buffer[8192];
     struct procsinfo pinfo;
 
-    pinfo.pi_pid = pid;
+    memset(procexe, 0, sizeof(*procexe));
 
+    pinfo.pi_pid = pid;
     if (getargs(&pinfo, sizeof(pinfo),
-                buffer, sizeof(buffer)) != 0)
-    {
-        return errno;
+                buffer, sizeof(buffer)) == 0) {
+
+        /* XXX argv[0] might be relative */
+        len = strlen(buffer);
+        SIGAR_SSTRCPY(procexe->name, buffer);
     }
-    /* XXX argv[0] might be relative */
-    len = strlen(buffer);
-    SIGAR_SSTRCPY(procexe->name, buffer);
 
     (void)SIGAR_PROC_FILENAME(buffer, pid, "/cwd");
-
     if ((len = readlink(buffer, procexe->cwd,
-                        sizeof(procexe->cwd)-1)) < 0)
-    {
-        return errno;
+                        sizeof(procexe->cwd)-1)) >= 0) {
+        procexe->cwd[len] = '\0';
     }
-    procexe->cwd[len] = '\0';
 
-    procexe->root[0] = '\0';
+	procexe->arch = sigar_elf_file_guess_arch(sigar, procexe->name);
 
     return SIGAR_OK;
 }

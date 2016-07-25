@@ -34,10 +34,10 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    for (i=0; i<proclist.number; i++) {
+    for (i = 0; i < proclist.number; i++) {
         sigar_pid_t pid = proclist.data[i];
         sigar_proc_state_t pstate;
-        sigar_proc_time_t ptime;
+        sigar_proc_exe_t pexe;
 
         status = sigar_proc_state_get(sigar, pid, &pstate);
         if (status != SIGAR_OK) {
@@ -45,19 +45,21 @@ int main(int argc, char **argv) {
             printf("error: %d (%s) proc_state(%d)\n",
                    status, sigar_strerror(sigar, status), pid);
 #endif
+            printf("%d    %s    %s\n", (int)pid, "unknown", "unknown");
             continue;
         }
 
-        status = sigar_proc_time_get(sigar, pid, &ptime);
+        status = sigar_proc_exe_get(sigar, pid, &pexe);
         if (status != SIGAR_OK) {
 #ifdef DEBUG
-            printf("error: %d (%s) proc_time(%d)\n",
+            printf("error: %d (%s) proc_exe(%d)\n",
                    status, sigar_strerror(sigar, status), pid);
 #endif
+            printf("%d    %s    %s\n", (int)pid, "unknown", pstate.name);
             continue;
         }
 
-        printf("%d %s\n", (int)pid, pstate.name);
+        printf("%d    %s    %s\n", (int)pid, pexe.arch, pstate.name);
     }
 
     sigar_proc_list_destroy(sigar, &proclist);

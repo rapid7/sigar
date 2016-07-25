@@ -612,12 +612,8 @@ int sigar_os_open(sigar_t **sigar_ptr)
     sigar_enable_privilege(SE_DEBUG_NAME);
 
     /* Open our WMI handle. */
-
     sigar->wmi_handle = (sigar_wmi_handle_t *)wmi_handle_open(&wmi_status);
-
-    if(wmi_status != 0)
-    {
-        /* TODO What shall we do if WMI open fails?  Retry every call? */
+    if (wmi_status != 0) {
         sigar_log_printf(sigar, SIGAR_LOG_WARN, "Unable to create WMI handle");
     }
 
@@ -1501,7 +1497,6 @@ static int get_proc_info(sigar_t *sigar, sigar_pid_t pid)
     memset(&perf_offsets, 0, sizeof(perf_offsets));
 
     object = get_process_object(sigar, &err);
-
     if (object == NULL) {
         return err;
     }
@@ -1587,8 +1582,8 @@ static int get_proc_info(sigar_t *sigar, sigar_pid_t pid)
         pinfo->handles  = PERF_VAL(PERF_IX_HANDLE_CNT);
         pinfo->threads  = PERF_VAL(PERF_IX_THREAD_CNT);
         pinfo->page_faults = PERF_VAL(PERF_IX_PAGE_FAULTS);
-	pinfo->bytes_read = PERF_VAL(PERF_IX_IO_READ_BYTES_SEC);
-	pinfo->bytes_written = PERF_VAL(PERF_IX_IO_WRITE_BYTES_SEC);
+        pinfo->bytes_read = PERF_VAL(PERF_IX_IO_READ_BYTES_SEC);
+        pinfo->bytes_written = PERF_VAL(PERF_IX_IO_WRITE_BYTES_SEC);
 
         return SIGAR_OK;
     }
@@ -1613,11 +1608,13 @@ static int sigar_remote_proc_args_get(sigar_t *sigar, sigar_pid_t pid,
     }
 
     /* likely we are 32-bit, pid process is 64-bit */
+    if (sigar->wmi_handle) {
 #ifdef MSVC
-    status = sigar_proc_args_wmi_get(sigar, pid, procargs);
+        status = sigar_proc_args_wmi_get(sigar, pid, procargs);
 #endif
-    if (status == ERROR_NOT_FOUND) {
-        status = SIGAR_NO_SUCH_PROCESS;
+        if (status == ERROR_NOT_FOUND) {
+            status = SIGAR_NO_SUCH_PROCESS;
+        }
     }
     return status;
 }

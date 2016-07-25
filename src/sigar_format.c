@@ -168,6 +168,15 @@ char *sigar_strerror_get(int err, char *errbuf, int buflen)
                         (LPTSTR)errbuf,
                         (DWORD)buflen,
                         NULL);
+
+    size_t len = strlen(errbuf);
+    if (len >= 2) {
+        char *end = errbuf + len - 1;
+        while (end > errbuf && isspace(*end)) {
+            end--;
+        }
+        end[1] = '\0';
+    }
 #else
     char *buf = NULL;
 

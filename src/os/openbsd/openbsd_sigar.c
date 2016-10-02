@@ -523,10 +523,11 @@ int sigar_proc_time_get(sigar_t *sigar, sigar_pid_t pid,
 #endif
 }
 
-#if 0
 int sigar_proc_state_get(sigar_t *sigar, sigar_pid_t pid,
                          sigar_proc_state_t *procstate)
 {
+    return SIGAR_ENOTIMPL;
+#if 0
     int status = sigar_get_pinfo(sigar, pid);
     bsd_pinfo_t *pinfo = sigar->pinfo;
     int state = pinfo->p_stat;
@@ -568,8 +569,8 @@ int sigar_proc_state_get(sigar_t *sigar, sigar_pid_t pid,
     }
 
     return SIGAR_OK;
-}
 #endif
+}
 
 int sigar_os_proc_args_get(sigar_t *sigar, sigar_pid_t pid,
                            sigar_proc_args_t *procargs)
@@ -917,7 +918,7 @@ int sigar_cpu_info_list_get(sigar_t *sigar,
         int mib[] = { CTL_HW, HW_MODEL };
         size = sizeof(model);
         if (sysctl(mib, NMIB(mib), &model[0], &size, NULL, 0) < 0) {
-            strcpy(model, "Unknown");
+            strlcpy(model, "Unknown", sizeof(model));
         }
     }
 

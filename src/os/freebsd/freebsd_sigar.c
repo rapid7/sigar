@@ -302,6 +302,10 @@ static int sigar_vmstat(sigar_t *sigar, struct vmmeter *vmstat)
     GET_VM_STATS(vm, v_inactive_target, 0);
     GET_VM_STATS(vm, v_inactive_count, 1);
     GET_VM_STATS(vm, v_cache_count, 1);
+#if (__FreeBSD_version < 1100079 )
+     GET_VM_STATS(vm, v_cache_min, 0);
+     GET_VM_STATS(vm, v_cache_max, 0);
+#endif
     GET_VM_STATS(vm, v_pageout_free_min, 0);
     GET_VM_STATS(vm, v_interrupt_free_min, 0);
     GET_VM_STATS(vm, v_forks, 0);
@@ -611,6 +615,17 @@ int sigar_system_stats_get (sigar_t *sigar,
 	return SIGAR_ENOTIMPL;
 }
 
+static int proc_fd_get_count(sigar_t *sigar, sigar_pid_t pid, int *num)
+{
+	sigar_proc_fd_t procfd;
+	if (sigar_proc_fd_get(sigar, pid, &procfd) == SIGAR_OK) {
+		*num = procfd.total;
+	} else {
+		return SIGAR_ENOTIMPL;
+	}
+	return SIGAR_OK;
+}
+
 #ifndef KERN_PROC_PROC
 /* freebsd 4.x */
 #define KERN_PROC_PROC KERN_PROC_ALL
@@ -812,6 +827,8 @@ int sigar_proc_state_get(sigar_t *sigar, sigar_pid_t pid,
         return status;
     }
 
+	procstate->open_files = SIGAR_FIELD_NOTIMPL;
+
     SIGAR_SSTRCPY(procstate->name, pinfo->KI_COMM);
     procstate->ppid     = pinfo->KI_PPID;
     procstate->priority = pinfo->KI_PRI;
@@ -819,6 +836,12 @@ int sigar_proc_state_get(sigar_t *sigar, sigar_pid_t pid,
     procstate->tty      = SIGAR_FIELD_NOTIMPL; /*XXX*/
     procstate->threads  = SIGAR_FIELD_NOTIMPL;
     procstate->processor = SIGAR_FIELD_NOTIMPL;
+
+	int num = 0;
+	status = proc_fd_get_count(sigar, pid, &num);
+	if (status == SIGAR_OK) {
+		procstate->open_files = num;
+	}
 
     switch (state) {
       case SIDL:

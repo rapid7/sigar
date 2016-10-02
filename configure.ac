@@ -43,17 +43,17 @@ case $host_os in
      SIGAR_LIBS="-framework IOKit -framework CoreServices"
      ;;
      *netbsd*)
-     SRC_OS="darwin"
+     SRC_OS="netbsd"
      AC_DEFINE(SIGAR_TEST_OS_DARWIN, [1], [for the tests])
      SIGAR_LIBS="-lkvm"
      ;;
      *openbsd*)
-     SRC_OS="darwin"
+     SRC_OS="openbsd"
      AC_DEFINE(SIGAR_TEST_OS_DARWIN, [1], [for the tests])
      SIGAR_LIBS="-lkvm"
      ;;
      *freebsd*)
-     SRC_OS="darwin"
+     SRC_OS="freebsd"
      AC_DEFINE(SIGAR_TEST_OS_DARWIN, [1], [for the tests])
      SIGAR_LIBS="-lkvm"
      ;;
@@ -110,6 +110,9 @@ AC_SUBST(SIGAR_LIBS)
 
 AM_CONDITIONAL(OS_WIN32, test x$SRC_OS = xwin32)
 AM_CONDITIONAL(OS_MACOSX, test x$SRC_OS = xdarwin)
+AM_CONDITIONAL(OS_NETBSD, test x$SRC_OS = xnetbsd)
+AM_CONDITIONAL(OS_OPENBSD, test x$SRC_OS = xopenbsd)
+AM_CONDITIONAL(OS_FREEBSD, test x$SRC_OS = xfreebsd)
 AM_CONDITIONAL(OS_LINUX, test x$SRC_OS = xlinux)
 AM_CONDITIONAL(OS_HPUX, test x$SRC_OS = xhpux)
 AM_CONDITIONAL(OS_AIX, test x$SRC_OS = xaix)
@@ -169,6 +172,8 @@ src/os/Makefile
 src/os/aix/Makefile
 src/os/darwin/Makefile
 src/os/freebsd/Makefile
+src/os/netbsd/Makefile
+src/os/openbsd/Makefile
 src/os/hpux/Makefile
 src/os/linux/Makefile
 src/os/solaris/Makefile

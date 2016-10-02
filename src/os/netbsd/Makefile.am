@@ -1,11 +1,11 @@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 
 SIGAR_OS_SRCS=\
-	freebsd_sigar.c
+	netbsd_sigar.c
 SIGAR_OS_HDRS=\
 	sigar_os.h
 
-if OS_FREEBSD
+if OS_NETBSD
 noinst_LTLIBRARIES = libsigar_os.la
 
 libsigar_os_la_SOURCES = ${SIGAR_OS_SRCS}

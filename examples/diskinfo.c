@@ -74,7 +74,10 @@ int getNumShards(const char *dbpath) {
 }
 
 int main(int argc, char **argv) {
-    getNumShards(argv[1]);
+    if (argv[1])
+        getNumShards(argv[1]);
+    else
+        printf("Usage: diskinfo <mount>\n");
 
     return 0;
 }

@@ -155,7 +155,7 @@ int sigar_os_open(sigar_t **sigar)
 
     *sigar = malloc(sizeof(**sigar));
 
-    (*sigar)->kmem = kvm_open(NULL, NULL, NULL, O_RDONLY, NULL);
+    (*sigar)->kmem = kvm_openfiles(NULL, NULL, NULL, KVM_NO_FILES, NULL);
     if (stat("/proc/curproc", &sb) < 0) {
         (*sigar)->proc_mounted = 0;
     }
@@ -376,23 +376,14 @@ int sigar_system_stats_get (sigar_t *sigar,
 int sigar_os_proc_list_get(sigar_t *sigar,
                            sigar_proc_list_t *proclist)
 {
-    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL, 0 };
     int i, num;
-    size_t len;
     struct kinfo_proc *proc;
 
-    if (sysctl(mib, NMIB(mib), NULL, &len, NULL, 0) < 0) {
-        return errno;
+    if (!sigar->kmem) {
+        return SIGAR_EPERM_KMEM;
     }
 
-    proc = malloc(len);
-
-    if (sysctl(mib, NMIB(mib), proc, &len, NULL, 0) < 0) {
-        free(proc);
-        return errno;
-    }
-
-    num = len/sizeof(*proc);
+    proc = kvm_getprocs(sigar->kmem, KERN_PROC_ALL, 0, sizeof(*proc), &num);
 
     for (i=0; i<num; i++) {
         if (proc[i].KI_FLAG & P_SYSTEM) {
@@ -405,15 +396,16 @@ int sigar_os_proc_list_get(sigar_t *sigar,
         proclist->data[proclist->number++] = proc[i].KI_PID;
     }
 
-    free(proc);
-
     return SIGAR_OK;
 }
 
-#if 0
 static int sigar_get_pinfo(sigar_t *sigar, sigar_pid_t pid)
 {
-    int mib[] = { CTL_KERN, KERN_PROC2, KERN_PROC_PID, 0, sizeof(*sigar->pinfo), 1 };
+	/*
+    int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, 0 };
+    */
+
+    int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, 0, sizeof(*sigar->pinfo), 1 };
     size_t len = sizeof(*sigar->pinfo);
     time_t timenow = time(NULL);
     mib[3] = pid;
@@ -437,7 +429,6 @@ static int sigar_get_pinfo(sigar_t *sigar, sigar_pid_t pid)
 
     return SIGAR_OK;
 }
-#endif
 
 #if defined(SHARED_TEXT_REGION_SIZE) && defined(SHARED_DATA_REGION_SIZE)
 #  define GLOBAL_SHARED_SIZE (SHARED_TEXT_REGION_SIZE + SHARED_DATA_REGION_SIZE) /* 10.4 SDK */
@@ -446,8 +437,6 @@ static int sigar_get_pinfo(sigar_t *sigar, sigar_pid_t pid)
 int sigar_proc_mem_get(sigar_t *sigar, sigar_pid_t pid,
                        sigar_proc_mem_t *procmem)
 {
-return SIGAR_ENOTIMPL;
-#if 0
     int status = sigar_get_pinfo(sigar, pid);
     bsd_pinfo_t *pinfo = sigar->pinfo;
 
@@ -467,7 +456,6 @@ return SIGAR_ENOTIMPL;
     procmem->page_faults  = procmem->minor_faults + procmem->major_faults;
 
     return SIGAR_OK;
-#endif
 }
 
 int sigar_proc_cumulative_disk_io_get(sigar_t *sigar, sigar_pid_t pid,
@@ -480,8 +468,6 @@ int sigar_proc_cumulative_disk_io_get(sigar_t *sigar, sigar_pid_t pid,
 int sigar_proc_cred_get(sigar_t *sigar, sigar_pid_t pid,
                         sigar_proc_cred_t *proccred)
 {
-    return SIGAR_ENOTIMPL;
-#if 0
     int status = sigar_get_pinfo(sigar, pid);
     bsd_pinfo_t *pinfo = sigar->pinfo;
 
@@ -495,7 +481,6 @@ int sigar_proc_cred_get(sigar_t *sigar, sigar_pid_t pid,
     proccred->egid = pinfo->p_gid;
 
     return SIGAR_OK;
-#endif
 }
 
 #define tv2msec(tv) \
@@ -504,8 +489,6 @@ int sigar_proc_cred_get(sigar_t *sigar, sigar_pid_t pid,
 int sigar_proc_time_get(sigar_t *sigar, sigar_pid_t pid,
                         sigar_proc_time_t *proctime)
 {
-    return SIGAR_ENOTIMPL;
-#if 0
     int status = sigar_get_pinfo(sigar, pid);
     bsd_pinfo_t *pinfo = sigar->pinfo;
 
@@ -520,14 +503,11 @@ int sigar_proc_time_get(sigar_t *sigar, sigar_pid_t pid,
     proctime->start_time = pinfo->p_ustart_sec * SIGAR_MSEC;
 
     return SIGAR_OK;
-#endif
 }
 
 int sigar_proc_state_get(sigar_t *sigar, sigar_pid_t pid,
                          sigar_proc_state_t *procstate)
 {
-    return SIGAR_ENOTIMPL;
-#if 0
     int status = sigar_get_pinfo(sigar, pid);
     bsd_pinfo_t *pinfo = sigar->pinfo;
     int state = pinfo->p_stat;
@@ -569,15 +549,12 @@ int sigar_proc_state_get(sigar_t *sigar, sigar_pid_t pid,
     }
 
     return SIGAR_OK;
-#endif
 }
 
 int sigar_os_proc_args_get(sigar_t *sigar, sigar_pid_t pid,
                            sigar_proc_args_t *procargs)
 {
-    return SIGAR_ENOTIMPL;
-#if 0
-    char buffer[SIGAR_ARG_MAX+1], **ptr=(char **)buffer;
+    char buffer[ARG_MAX+1], **ptr=(char **)buffer;
     size_t len = sizeof(buffer);
     int mib[] = { CTL_KERN, KERN_PROC_ARGS, 0, KERN_PROC_ARGV };
     mib[2] = pid;
@@ -602,14 +579,11 @@ int sigar_os_proc_args_get(sigar_t *sigar, sigar_pid_t pid,
     }
 
     return SIGAR_OK;
-#endif
 }
 
 int sigar_proc_env_get(sigar_t *sigar, sigar_pid_t pid,
                        sigar_proc_env_t *procenv)
 {
-    return SIGAR_ENOTIMPL;
-#if 0
     char **env;
     struct kinfo_proc *pinfo;
     int num;
@@ -618,7 +592,7 @@ int sigar_proc_env_get(sigar_t *sigar, sigar_pid_t pid,
         return SIGAR_EPERM_KMEM;
     }
 
-    pinfo = kvm_getprocs(sigar->kmem, KERN_PROC_PID, pid, &num);
+    pinfo = kvm_getprocs(sigar->kmem, KERN_PROC_PID, pid, sizeof(*pinfo), &num);
     if (!pinfo || (num < 1)) {
         return errno;
     }
@@ -657,7 +631,6 @@ int sigar_proc_env_get(sigar_t *sigar, sigar_pid_t pid,
     }
 
     return SIGAR_OK;
-#endif
 }
 
 int sigar_proc_fd_get(sigar_t *sigar, sigar_pid_t pid,
@@ -1413,7 +1386,6 @@ int sigar_net_interface_stat_get(sigar_t *sigar, const char *name,
     return SIGAR_OK;
 }
 
-#if 0
 static int net_connection_state_get(int state)
 {
     switch (state) {
@@ -1443,13 +1415,11 @@ static int net_connection_state_get(int state)
         return SIGAR_TCP_UNKNOWN;
     }
 }
-#endif
 
 static int net_connection_get(sigar_net_connection_walker_t *walker, int proto)
 {
     return SIGAR_ENOTIMPL;
 
-    /*
     int status;
     int istcp = 0, type;
     int flags = walker->flags;
@@ -1476,9 +1446,9 @@ static int net_connection_get(sigar_net_connection_walker_t *walker, int proto)
     }
 
     prev = head =
-        (struct inpcb *)&CIRCLEQ_FIRST(&((struct inpcbtable *)offset)->inpt_queue);
+        (struct inpcb *)&TAILQ_FIRST(&((struct inpcbtable *)offset)->inpt_queue);
 
-    next = (struct inpcb *)CIRCLEQ_FIRST(&table.inpt_queue);
+    next = (struct inpcb *)TAILQ_FIRST(&table.inpt_queue);
 
     while (next != head) {
         struct inpcb inpcb;
@@ -1487,7 +1457,7 @@ static int net_connection_get(sigar_net_connection_walker_t *walker, int proto)
 
         status = kread(sigar, &inpcb, sizeof(inpcb), (long)next);
         prev = next;
-        next = (struct inpcb *)CIRCLEQ_NEXT(&inpcb, inp_queue);
+        next = (struct inpcb *)TAILQ_NEXT(&inpcb, inp_queue);
 
         kread(sigar, &socket, sizeof(socket), (u_long)inpcb.inp_socket);
 
@@ -1540,7 +1510,6 @@ static int net_connection_get(sigar_net_connection_walker_t *walker, int proto)
     }
 
     return SIGAR_OK;
-    */
 }
 
 int sigar_net_connection_walk(sigar_net_connection_walker_t *walker)

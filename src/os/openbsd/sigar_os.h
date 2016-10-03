@@ -29,7 +29,7 @@ enum {
     KOFFSET_MAX
 };
 
-typedef struct kinfo_proc2 bsd_pinfo_t;
+typedef struct kinfo_proc bsd_pinfo_t;
 
 struct sigar_t {
     SIGAR_T_BASE;

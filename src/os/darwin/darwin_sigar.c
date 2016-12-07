@@ -988,6 +988,51 @@ static int proc_fdinfo_get(sigar_t *sigar, sigar_pid_t pid, int *num)
 
 #endif
 
+static int proc_fd_get_count(sigar_t *sigar, sigar_pid_t pid, int *num)
+{
+
+#if defined(DARWIN)
+
+    int pinfo_size;
+    struct proc_fdinfo *pbuffer;
+
+    if (!sigar->libproc) {
+        return SIGAR_ENOTIMPL;
+    }
+
+    pinfo_size = sigar->proc_pidinfo(pid, PROC_PIDLISTFDS, 0, NULL, 0);
+
+    if (pinfo_size <= 0) {
+        return SIGAR_ENOTIMPL;
+    }
+
+    pbuffer = malloc(pinfo_size);
+    pinfo_size = sigar->proc_pidinfo(pid, PROC_PIDLISTFDS, 0, pbuffer, pinfo_size);
+    free(pbuffer);
+
+    *num = pinfo_size / PROC_PIDLISTFD_SIZE;
+
+    return SIGAR_OK;
+
+#elif defined(__FreeBSD__)
+
+    sigar_proc_fd_t procfd;
+    if(sigar_proc_fd_get(sigar, pid, &procfd) == SIGAR_OK) {
+        *num = procfd.total;
+    } else {
+        return SIGAR_ENOTIMPL;
+	}
+
+    return SIGAR_OK;
+
+#else
+
+    return SIGAR_ENOTIMPL;
+
+#endif
+
+}
+
 #ifndef KERN_PROC_PROC
 /* freebsd 4.x */
 #define KERN_PROC_PROC KERN_PROC_ALL
@@ -1490,6 +1535,8 @@ int sigar_proc_state_get(sigar_t *sigar, sigar_pid_t pid,
         return status;
     }
 
+    procstate->open_files = SIGAR_FIELD_NOTIMPL;
+
 #if defined(__OpenBSD__) || defined(__NetBSD__)
     SIGAR_SSTRCPY(procstate->name, pinfo->p_comm);
     procstate->ppid     = pinfo->p_ppid;
@@ -1507,6 +1554,12 @@ int sigar_proc_state_get(sigar_t *sigar, sigar_pid_t pid,
     procstate->threads  = SIGAR_FIELD_NOTIMPL;
     procstate->processor = SIGAR_FIELD_NOTIMPL;
 #endif
+
+    int num = 0;
+    status = proc_fd_get_count(sigar, pid, &num);
+    if (status == SIGAR_OK) {
+        procstate->open_files = num;
+    }
 
 #ifdef DARWIN
     status = sigar_proc_threads_get(sigar, pid, procstate);

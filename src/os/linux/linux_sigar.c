@@ -954,16 +954,20 @@ int sigar_proc_state_get(sigar_t *sigar, sigar_pid_t pid,
      * character filename, assume it is truncated and attempt to extract the
      * full name from the process arguments.
      */
+
+    sigar_proc_args_t procargs = { 0 };
     memset(procstate->name, 0, sizeof(procstate->name));
     const char *procname = pstat->name;
     if (strlen(pstat->name) == 15) {
-        sigar_proc_args_t procargs = { 0 };
         if (sigar_procfs_args_get(sigar, pid, &procargs) == SIGAR_OK &&
                 procargs.number >= 1) {
             procname = procargs.data[0];
         }
     }
+
     strncpy(procstate->name, procname, sizeof(procstate->name) - 1);
+
+    sigar_proc_args_destroy(sigar, &procargs);
 
     procstate->state = pstat->state;
 

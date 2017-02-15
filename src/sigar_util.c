@@ -840,8 +840,13 @@ int sigar_cpu_mhz_from_model(char *model)
 #ifdef HAVE_RPC_RPC_H
 #include <netdb.h>
 #include <rpc/rpc.h>
+#ifdef __APPLE__
+#include "TargetConditionals.h"
+#endif
+#if !TARGET_OS_IPHONE
 #include <rpc/pmap_prot.h>
 #include <rpc/pmap_clnt.h>
+#endif
 #ifdef SIGAR_HPUX
 #include <nfs/nfs.h>
 #endif

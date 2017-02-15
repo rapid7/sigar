@@ -21,10 +21,15 @@
 #include "sigar_util.h"
 #include "sigar_os.h"
 
+#include "TargetConditionals.h"
+
 #include <sys/param.h>
 #include <sys/mount.h>
+#if !TARGET_OS_IPHONE
 #include <nfs/rpcv2.h>
 #include <nfs/nfsproto.h>
+#include <nfs/nfs.h>
+#endif
 
 #include <dlfcn.h>
 #include <mach/mach_init.h>
@@ -37,6 +42,7 @@
 #include <mach/thread_act.h>
 #include <mach/thread_info.h>
 #include <mach/vm_map.h>
+#if !TARGET_OS_IPHONE
 #if !defined(HAVE_SHARED_REGION_H) && defined(__MAC_10_5) /* see Availability.h */
 #  define HAVE_SHARED_REGION_H /* suckit autoconf */
 #endif
@@ -45,16 +51,17 @@
 #else
 #include <mach/shared_memory_server.h> /* deprecated in Leopard */
 #endif
+#endif
 #include <mach-o/dyld.h>
 #define __OPENTRANSPORTPROVIDERS__
+#if !TARGET_OS_IPHONE
 #include <CoreServices/CoreServices.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOBSD.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOTypes.h>
 #include <IOKit/storage/IOBlockStorageDriver.h>
-
-#include <nfs/nfs.h>
+#endif
 
 #include <sys/ioctl.h>
 #include <sys/mount.h>
@@ -65,10 +72,18 @@
 
 #include <net/if.h>
 #include <net/if_dl.h>
+
+#if TARGET_OS_IPHONE
+#include "if_types.h"
+#include "tcp_fsm.h"
+#define RTM_NEWADDR 0xc /* address being added to iface */
+#define RTM_IFINFO  0xe /* iface going up/down etc. */
+#else
 #include <net/if_types.h>
 #include <net/route.h>
 #include <netinet/in.h>
 #include <netinet/if_ether.h>
+#endif
 
 #include <dirent.h>
 #include <errno.h>
@@ -81,7 +96,11 @@
 #include <netinet/tcp.h>
 #include <netinet/tcp_timer.h>
 #include <netinet/tcp_var.h>
+#if !TARGET_OS_IPHONE
 #include <netinet/tcp_fsm.h>
+#endif
+
+#include <sys/utsname.h>
 
 #define NMIB(mib) (sizeof(mib)/sizeof(mib[0]))
 
@@ -451,16 +470,16 @@ int sigar_uptime_get(sigar_t *sigar,
 int sigar_loadavg_get(sigar_t *sigar,
                       sigar_loadavg_t *loadavg)
 {
-	loadavg->processor_queue = SIGAR_FIELD_NOTIMPL;
-	getloadavg(loadavg->loadavg, 3);
+    loadavg->processor_queue = SIGAR_FIELD_NOTIMPL;
+    getloadavg(loadavg->loadavg, 3);
 
-	return SIGAR_OK;
+    return SIGAR_OK;
 }
 
 int sigar_system_stats_get (sigar_t *sigar,
                             sigar_system_stats_t *system_stats)
 {
-	return SIGAR_ENOTIMPL;
+    return SIGAR_ENOTIMPL;
 }
 
 #if defined(DARWIN_HAS_LIBPROC_H)
@@ -470,9 +489,11 @@ static int proc_fdinfo_get(sigar_t *sigar, sigar_pid_t pid, int *num)
     int rsize;
     const int init_size = PROC_PIDLISTFD_SIZE * 32;
 
+#ifdef DARWIN_HAS_LIBPROC_H
     if (!sigar->libproc) {
         return SIGAR_ENOTIMPL;
     }
+#endif
 
     if (sigar->ifconf_len == 0) {
         sigar->ifconf_len = init_size;
@@ -502,6 +523,9 @@ static int proc_fdinfo_get(sigar_t *sigar, sigar_pid_t pid, int *num)
 
 static int proc_fd_get_count(sigar_t *sigar, sigar_pid_t pid, int *num)
 {
+#if TARGET_OS_IPHONE
+    return SIGAR_ENOTIMPL;
+#else
     int pinfo_size;
     struct proc_fdinfo *pbuffer;
 
@@ -522,6 +546,7 @@ static int proc_fd_get_count(sigar_t *sigar, sigar_pid_t pid, int *num)
     *num = pinfo_size / PROC_PIDLISTFD_SIZE;
 
     return SIGAR_OK;
+#endif
 }
 
 int sigar_os_proc_list_get(sigar_t *sigar,
@@ -619,7 +644,7 @@ static mach_vm_size_t sigar_shared_region_size(cpu_type_t type)
       case CPU_TYPE_POWERPC:
         return SHARED_REGION_SIZE_PPC;
       case CPU_TYPE_POWERPC64:
-	return SHARED_REGION_SIZE_PPC64;
+        return SHARED_REGION_SIZE_PPC64;
       case CPU_TYPE_I386:
         return SHARED_REGION_SIZE_I386;
       case CPU_TYPE_X86_64:
@@ -1413,6 +1438,9 @@ int sigar_file_system_list_get(sigar_t *sigar,
 int sigar_disk_usage_get(sigar_t *sigar, const char *name,
                          sigar_disk_usage_t *disk)
 {
+#if TARGET_OS_IPHONE
+    return SIGAR_ENOTIMPL;
+#else
     kern_return_t status;
     io_registry_entry_t parent;
     io_service_t service;
@@ -1484,6 +1512,7 @@ int sigar_disk_usage_get(sigar_t *sigar, const char *name,
     IOObjectRelease(parent);
 
     return SIGAR_OK;
+#endif
 }
 
 int sigar_file_system_usage_get(sigar_t *sigar,
@@ -1635,6 +1664,9 @@ int sigar_cpu_info_list_get(sigar_t *sigar,
 int sigar_net_route_list_get(sigar_t *sigar,
                              sigar_net_route_list_t *routelist)
 {
+#if TARGET_OS_IPHONE
+    return SIGAR_ENOTIMPL;
+#else
     size_t needed;
     int bit;
     char *buf, *next, *lim;
@@ -1709,6 +1741,7 @@ int sigar_net_route_list_get(sigar_t *sigar,
     free(buf);
 
     return SIGAR_OK;
+#endif
 }
 
 typedef enum {
@@ -2237,27 +2270,30 @@ int sigar_net_connection_walk(sigar_net_connection_walker_t *walker)
 SIGAR_DECLARE(int)
 sigar_net_listeners_get(sigar_net_connection_walker_t *walker)
 {
-	int i, status;
+    int status;
 
-	status = sigar_net_connection_walk(walker);
+    status = sigar_net_connection_walk(walker);
 
-	if (status != SIGAR_OK) {
-		return status;
-	}
+    if (status != SIGAR_OK) {
+        return status;
+    }
 
-	sigar_net_connection_list_t *list = walker->data;
+#if defined(DARWIN_HAS_LIBPROC_H)
+    int i;
+    sigar_net_connection_list_t *list = walker->data;
 
-	sigar_pid_t pid;
-	for (i = 0; i < list->number; i++) {
-		status = sigar_proc_port_get(walker->sigar, walker->flags,
-			list->data[i].local_port, &pid);
+    sigar_pid_t pid;
+    for (i = 0; i < list->number; i++) {
+        status = sigar_proc_port_get(walker->sigar, walker->flags,
+            list->data[i].local_port, &pid);
 
-		if (status == SIGAR_OK) {
-			list->data[i].pid = pid;
-		}
-	}
+        if (status == SIGAR_OK) {
+            list->data[i].pid = pid;
+        }
+    }
+#endif
 
-	return SIGAR_OK;
+    return SIGAR_OK;
 }
 
 SIGAR_DECLARE(int)
@@ -2292,6 +2328,7 @@ sigar_tcp_get(sigar_t *sigar,
     return SIGAR_OK;
 }
 
+#if !TARGET_OS_IPHONE
 static int get_nfsstats(struct nfsstats *stats)
 {
     size_t len = sizeof(*stats);
@@ -2332,6 +2369,7 @@ static void map_nfs_stats(sigar_nfs_v3_t *nfs, rpc_cnt_t *rpc)
     nfs->pathconf = rpc[NFSPROC_PATHCONF];
     nfs->commit = rpc[NFSPROC_COMMIT];
 }
+#endif
 
 int sigar_nfs_client_v2_get(sigar_t *sigar,
                             sigar_nfs_client_v2_t *nfs)
@@ -2348,6 +2386,9 @@ int sigar_nfs_server_v2_get(sigar_t *sigar,
 int sigar_nfs_client_v3_get(sigar_t *sigar,
                             sigar_nfs_client_v3_t *nfs)
 {
+#if TARGET_OS_IPHONE
+    return SIGAR_ENOTIMPL;
+#else
     int status;
     struct nfsstats stats;
 
@@ -2358,11 +2399,15 @@ int sigar_nfs_client_v3_get(sigar_t *sigar,
     map_nfs_stats((sigar_nfs_v3_t *)nfs, &stats.rpccnt[0]);
 
     return SIGAR_OK;
+#endif
 }
 
 int sigar_nfs_server_v3_get(sigar_t *sigar,
                             sigar_nfs_server_v3_t *nfs)
 {
+#if TARGET_OS_IPHONE
+    return SIGAR_ENOTIMPL;
+#else
     int status;
     struct nfsstats stats;
 
@@ -2373,8 +2418,10 @@ int sigar_nfs_server_v3_get(sigar_t *sigar,
     map_nfs_stats((sigar_nfs_v3_t *)nfs, &stats.srvrpccnt[0]);
 
     return SIGAR_OK;
+#endif
 }
 
+#if !TARGET_OS_IPHONE
 static char *get_hw_type(int type)
 {
     switch (type) {
@@ -2398,10 +2445,14 @@ static char *get_hw_type(int type)
         return "unknown";
     }
 }
+#endif
 
 int sigar_arp_list_get(sigar_t *sigar,
                        sigar_arp_list_t *arplist)
 {
+#if TARGET_OS_IPHONE
+    return SIGAR_ENOTIMPL;
+#else
     size_t needed;
     char *lim, *buf, *next;
     struct rt_msghdr *rtm;
@@ -2448,6 +2499,7 @@ int sigar_arp_list_get(sigar_t *sigar,
     free(buf);
 
     return SIGAR_OK;
+#endif
 }
 
 #if defined(DARWIN_HAS_LIBPROC_H)
@@ -2520,6 +2572,17 @@ int sigar_proc_port_get(sigar_t *sigar, int protocol,
 int sigar_os_sys_info_get(sigar_t *sigar,
                           sigar_sys_info_t *sysinfo)
 {
+#if TARGET_OS_IPHONE
+    struct utsname uname_data;
+    uname(&uname_data);
+    SIGAR_SSTRCPY(sysinfo->name, "iOS");
+    SIGAR_SSTRCPY(sysinfo->vendor_name, "Apple");
+    SIGAR_SSTRCPY(sysinfo->vendor, "Apple");
+    SIGAR_SSTRCPY(sysinfo->vendor_version, uname_data.release);
+    SIGAR_SSTRCPY(sysinfo->version, uname_data.release);
+    SIGAR_SSTRCPY(sysinfo->vendor_code_name, uname_data.machine);
+    SIGAR_SSTRCPY(sysinfo->description, uname_data.machine);
+#else
     char *codename = NULL;
     SInt32 version_major, version_minor, version_fix;
 
@@ -2607,7 +2670,56 @@ int sigar_os_sys_info_get(sigar_t *sigar,
              sizeof(sysinfo->description),
              "%s %s",
              sysinfo->vendor_name, sysinfo->vendor_code_name);
+#endif
 
+    const char * arch = "unknown";
+    size_t size;
+    cpu_type_t type;
+    cpu_subtype_t subtype;
+    size = sizeof(type);
+    sysctlbyname("hw.cputype", &type, &size, NULL, 0);
+    size = sizeof(subtype);
+    sysctlbyname("hw.cpusubtype", &subtype, &size, NULL, 0);
+
+    if (type == CPU_TYPE_X86_64) {
+        arch = "x86_64";
+    } else if (type == CPU_TYPE_X86) {
+        arch = "x86";
+    } else if (type == CPU_TYPE_POWERPC) {
+        arch = "powerpc";
+    } else if (type == CPU_TYPE_POWERPC64) {
+        arch = "powerpc64";
+    } else if (type == CPU_TYPE_ARM) {
+        switch(subtype) {
+#ifdef CPU_SUBTYPE_ARM_V6
+            case CPU_SUBTYPE_ARM_V6:
+                arch = "armv6";
+                break;
+#endif
+#ifdef CPU_SUBTYPE_ARM_V7
+            case CPU_SUBTYPE_ARM_V7:
+                arch = "armv7";
+                break;
+#endif
+#ifdef CPU_SUBTYPE_ARM_V7S
+            case CPU_SUBTYPE_ARM_V7S:
+                arch = "armv7s";
+                break;
+#endif
+#ifdef CPU_SUBTYPE_ARM_V8
+            case CPU_SUBTYPE_ARM_V8:
+                arch = "armv8";
+                break;
+#endif
+            default:
+                arch = "arm";
+        }
+#ifdef CPU_TYPE_ARM64
+    } else if (type == CPU_TYPE_ARM64) {
+        arch = "arm64";
+#endif
+    }
+    SIGAR_SSTRCPY(sysinfo->arch, arch);
     return SIGAR_OK;
 }
 

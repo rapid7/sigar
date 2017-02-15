@@ -40,7 +40,10 @@ case $host_os in
      SRC_OS="darwin"
      AC_DEFINE(DARWIN,[],[running on MacOS X])
      AC_DEFINE(SIGAR_TEST_OS_DARWIN, [1], [for the tests])
-     SIGAR_LIBS="-framework IOKit -framework CoreServices"
+     SIGAR_LIBS="-framework IOKit"
+     AC_CHECK_HEADERS([CoreServices/CoreServices.h],
+        [SIGAR_LIBS="$SIGAR_LIBS -framework CoreServices"],
+        )
      ;;
      *netbsd*)
      SRC_OS="netbsd"

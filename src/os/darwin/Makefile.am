@@ -3,7 +3,9 @@ AM_CPPFLAGS = @AM_CPPFLAGS@
 SIGAR_OS_SRCS=\
 	darwin_sigar.c
 SIGAR_OS_HDRS=\
-	sigar_os.h
+	sigar_os.h \
+	if_types.h \
+	tcp_fsm.h
 
 if OS_MACOSX
 noinst_LTLIBRARIES = libsigar_os.la

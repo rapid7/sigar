@@ -55,7 +55,9 @@
 #include "sigar_util.h"
 
 #ifdef MSVC
+#ifndef INT64_C
 #  define INT64_C(val) val##i64
+#endif
 #  define SIGAR_DLLFUNC(api, name) \
     struct { \
          const char *name; \
@@ -63,7 +65,9 @@
     } ##name
 #else
 /* The GCC compiler doesn't require/accept the ## prefix */
+#ifndef INT64_C
 #  define INT64_C(val) val##L
+#endif
 #  define SIGAR_DLLFUNC(api, name)		\
     struct { \
          const char *name; \

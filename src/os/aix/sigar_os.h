@@ -63,10 +63,8 @@ struct sigar_t {
     char model[128];
     int aix_version;
     int thrusage;
-    sigar_cache_t *diskmap; 
+    sigar_cache_t *diskmap;
 };
-
-#define HAVE_STRERROR_R
 
 #define SIGAR_EPERM_KMEM (SIGAR_OS_START_ERROR+EACCES)
 

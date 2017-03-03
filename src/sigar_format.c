@@ -178,23 +178,8 @@ char *sigar_strerror_get(int err, char *errbuf, int buflen)
         end[1] = '\0';
     }
 #else
-    char *buf = NULL;
 
-#if defined(HAVE_STRERROR_R) && defined(HAVE_STRERROR_R_GLIBC)
-    /*
-     * strerror_r man page says:
-     * "The GNU version may, but need not, use the user supplied buffer"
-     */
-    buf = strerror_r(err, errbuf, buflen);
-#elif defined(HAVE_STRERROR_R)
-    if (strerror_r(err, errbuf, buflen) < 0) {
-        buf = "Unknown Error";
-    }
-#else
-    /* strerror() is thread safe on solaris and hpux */
-    buf = strerror(err);
-#endif
-
+    char *buf = strerror(err);
     if (buf != NULL) {
         SIGAR_STRNCPY(errbuf, buf, buflen);
     }

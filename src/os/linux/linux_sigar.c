@@ -666,7 +666,7 @@ int sigar_os_proc_list_get(sigar_t *sigar,
                            sigar_proc_list_t *proclist)
 {
     DIR *dirp = opendir(gPROCP_FS_ROOT);
-    struct dirent *ent, dbuf;
+    struct dirent *ent;
     register const int threadbadhack = !sigar->has_nptl;
 
     if (!dirp) {
@@ -677,7 +677,7 @@ int sigar_os_proc_list_get(sigar_t *sigar,
         sigar->proc_signal_offset = get_proc_signal_offset();
     }
 
-    while (readdir_r(dirp, &dbuf, &ent) == 0) {
+    while ((ent = readdir(dirp)) != NULL) {
         if (!ent) {
             break;
         }
@@ -2736,7 +2736,7 @@ int sigar_proc_port_get(sigar_t *sigar, int protocol,
     int status;
     sigar_net_connection_t netconn;
     DIR *dirp;
-    struct dirent *ent, dbuf;
+    struct dirent *ent;
 
     SIGAR_ZERO(&netconn);
     *pid = 0;
@@ -2756,9 +2756,9 @@ int sigar_proc_port_get(sigar_t *sigar, int protocol,
         return errno;
     }
 
-    while (readdir_r(dirp, &dbuf, &ent) == 0) {
+    while ((ent = readdir(dirp)) != NULL) {
         DIR *fd_dirp;
-        struct dirent *fd_ent, fd_dbuf;
+        struct dirent *fd_ent;
         struct stat sb;
         char fd_name[BUFSIZ], pid_name[BUFSIZ];
         int len, slen;
@@ -2801,7 +2801,7 @@ int sigar_proc_port_get(sigar_t *sigar, int protocol,
             continue;
         }
 
-        while (readdir_r(fd_dirp, &fd_dbuf, &fd_ent) == 0) {
+        while ((fd_ent = readdir(fd_dirp)) != NULL) {
             char fd_ent_name[BUFSIZ];
 
             if (fd_ent == NULL) {

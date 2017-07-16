@@ -2584,7 +2584,7 @@ int sigar_os_sys_info_get(sigar_t *sigar,
     SIGAR_SSTRCPY(sysinfo->description, uname_data.machine);
 #else
     char *codename = NULL;
-    SInt32 version_major, version_minor, version_fix;
+    int version_major, version_minor, version_fix;
 
     SIGAR_SSTRCPY(sysinfo->name, "MacOSX");
     SIGAR_SSTRCPY(sysinfo->vendor_name, "Mac OS X");
@@ -2607,12 +2607,12 @@ int sigar_os_sys_info_get(sigar_t *sigar,
     snprintf(sysinfo->vendor_version,
              sizeof(sysinfo->vendor_version),
              "%d.%d",
-             (int)version_major, (int)version_minor);
+             version_major, version_minor);
 
     snprintf(sysinfo->version,
              sizeof(sysinfo->version),
              "%s.%d",
-             sysinfo->vendor_version, (int)version_fix);
+             sysinfo->vendor_version, version_fix);
 
     if (version_major == 10) {
         switch (version_minor) {

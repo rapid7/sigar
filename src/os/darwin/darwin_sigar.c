@@ -2573,21 +2573,25 @@ int sigar_os_sys_info_get(sigar_t *sigar,
                           sigar_sys_info_t *sysinfo)
 {
 #if TARGET_OS_IPHONE
+    char osversion[32] = "Unknown";
+    size_t s = sizeof(osversion);
+    sysctlbyname("kern.osversion", &osversion, &s, NULL, 0);
+    SIGAR_SSTRCPY(sysinfo->version, osversion);
+
     struct utsname uname_data;
     uname(&uname_data);
     SIGAR_SSTRCPY(sysinfo->name, "iOS");
     SIGAR_SSTRCPY(sysinfo->vendor_name, "Apple");
     SIGAR_SSTRCPY(sysinfo->vendor, "Apple");
     SIGAR_SSTRCPY(sysinfo->vendor_version, uname_data.release);
-    SIGAR_SSTRCPY(sysinfo->version, uname_data.release);
     SIGAR_SSTRCPY(sysinfo->vendor_code_name, uname_data.machine);
     SIGAR_SSTRCPY(sysinfo->description, uname_data.machine);
 #else
     char *codename = NULL;
     int version_major, version_minor, version_fix;
 
-    SIGAR_SSTRCPY(sysinfo->name, "MacOSX");
-    SIGAR_SSTRCPY(sysinfo->vendor_name, "Mac OS X");
+    SIGAR_SSTRCPY(sysinfo->name, "macOS");
+    SIGAR_SSTRCPY(sysinfo->vendor_name, "macOS");
     SIGAR_SSTRCPY(sysinfo->vendor, "Apple");
 
     FILE *fp = popen("/usr/bin/sw_vers -productVersion", "r");
@@ -2601,8 +2605,9 @@ int sigar_os_sys_info_get(sigar_t *sigar,
     pclose(fp);
     count = sscanf(val, "%d.%d.%d", &version_major, &version_minor, &version_fix);
 
-    if(count != 3)
+    if(count < 2) {
         return SIGAR_ENOTIMPL;
+    }
 
     snprintf(sysinfo->vendor_version,
              sizeof(sysinfo->vendor_version),

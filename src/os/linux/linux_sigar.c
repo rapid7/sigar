@@ -1255,6 +1255,16 @@ int sigar_file_system_list_get(sigar_t *sigar,
     return SIGAR_OK;
 }
 
+#ifndef major
+#define major(x) \
+    ((unsigned)( (((x)>>31>>1) & 0xfffff000) | (((x)>>8) & 0x00000fff) ))
+#endif
+
+#ifndef minor
+#define minor(x) \
+    ((unsigned)( (((x)>>12) & 0xffffff00) | ((x) & 0x000000ff) ))
+#endif
+
 #define ST_MAJOR(sb) major((sb).st_rdev)
 #define ST_MINOR(sb) minor((sb).st_rdev)
 

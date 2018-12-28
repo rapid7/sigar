@@ -724,7 +724,7 @@ static int dir_stat_get(sigar_t *sigar,
         return errno;
     }
 
-    strncpy(name, dir, sizeof(name));
+    strncpy(name, dir, sizeof(name) - 1);
     ptr += len;
     if (name[len] != '/') {
         *ptr++ = '/';

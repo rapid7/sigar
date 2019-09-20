@@ -602,14 +602,14 @@ static SIGAR_INLINE int proc_isthread(sigar_t *sigar, char *pidstr, int len)
     int fd, n, offset=sigar->proc_signal_offset;
 
     /* sprintf(buffer, "/proc/%s/stat", pidstr) */
-    memcpy(ptr, gPROCP_FS_ROOT, SSTRLEN(gPROCP_FS_ROOT));
-    ptr += SSTRLEN(gPROCP_FS_ROOT);
+    memcpy(ptr, gPROCP_FS_ROOT, strlen(gPROCP_FS_ROOT));
+    ptr += strlen(gPROCP_FS_ROOT);
 
     memcpy(ptr, pidstr, len);
     ptr += len;
 
-    memcpy(ptr, PROC_PSTAT, SSTRLEN(PROC_PSTAT));
-    ptr += SSTRLEN(PROC_PSTAT);
+    memcpy(ptr, PROC_PSTAT, strlen(PROC_PSTAT));
+    ptr += strlen(PROC_PSTAT);
 
     *ptr = '\0';
 
@@ -1286,7 +1286,7 @@ static int get_iostat_sys(sigar_t *sigar,
     name = fsdev = (*iodev)->name;
 
     if (SIGAR_NAME_IS_DEV(name)) {
-        name += SSTRLEN(SIGAR_DEV_PREFIX); /* strip "/dev/" */
+        name += strlen(SIGAR_DEV_PREFIX); /* strip "/dev/" */
     }
 
     while (!sigar_isdigit(*fsdev)) {
@@ -2783,8 +2783,8 @@ int sigar_proc_port_get(sigar_t *sigar, int protocol,
         }
 
         /* sprintf(pid_name, "/proc/%s", ent->d_name) */
-        memcpy(&pid_name[0], gPROCP_FS_ROOT, SSTRLEN(gPROCP_FS_ROOT));
-        len = SSTRLEN(gPROCP_FS_ROOT);
+        memcpy(&pid_name[0], gPROCP_FS_ROOT, strlen(gPROCP_FS_ROOT));
+        len = strlen(gPROCP_FS_ROOT);
         pid_name[len++] = '/';
 
         slen = strlen(ent->d_name);
@@ -2795,9 +2795,13 @@ int sigar_proc_port_get(sigar_t *sigar, int protocol,
         if (stat(pid_name, &sb) < 0) {
             continue;
         }
+
+        /*
+        * This is missing processes that switch UIDs while running
         if (sb.st_uid != netconn.uid) {
             continue;
         }
+        */
 
         /* sprintf(fd_name, "%s/fd", pid_name) */
         memcpy(&fd_name[0], pid_name, len);

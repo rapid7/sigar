@@ -3769,6 +3769,12 @@ int sigar_os_sys_info_get(sigar_t *sigar,
           case 12:
             codename = "Sierra";
             break;
+          case 13:
+            codename = "High Sierra";
+            break;
+          case 14:
+            codename = "Mojave";
+            break;
           default:
             codename = "Unknown";
             break;

@@ -2660,6 +2660,9 @@ int sigar_os_sys_info_get(sigar_t *sigar,
           case 14:
             codename = "Mojave";
             break;
+          case 15:
+            codename = "Catalina";
+            break;
           default:
             codename = "Unknown";
             break;

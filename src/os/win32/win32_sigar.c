@@ -3727,7 +3727,7 @@ static int get_logon_info(HKEY users,
 
     who->time = 0;
 
-    sprintf(key_name, "%s\\Volatile Environment", username);
+    snprintf(key_name, sizeof(key_name), "%s\\Volatile Environment", username);
     if (RegOpenKey(users, key_name, &key) != ERROR_SUCCESS) {
         return ENOENT;
     }

@@ -486,7 +486,7 @@ static int dir_stat_get(sigar_t *sigar,
         return ERROR_NO_MORE_FILES;
     }
 
-    strncpy(name, dir, sizeof(name));
+    strncpy(name, dir, sizeof(name) - 1);
     ptr += len;
     if (strchr(dir, '/')) {
         delim = '/';

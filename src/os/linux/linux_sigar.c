@@ -965,7 +965,7 @@ int sigar_proc_state_get(sigar_t *sigar, sigar_pid_t pid,
         }
     }
 
-    strncpy(procstate->name, procname, sizeof(procstate->name) - 1);
+    snprintf(procstate->name, sizeof(procstate->name), "%s", procname);
 
     sigar_proc_args_destroy(sigar, &procargs);
 

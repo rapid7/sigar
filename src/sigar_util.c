@@ -918,6 +918,7 @@ int sigar_file2str(const char *fname, char *buffer, int buflen)
 {
     int len, status;
     int fd = open(fname, O_RDONLY);
+    memset(buffer, '\0', buflen);
 
     if (fd < 0) {
         return ENOENT;
@@ -925,10 +926,8 @@ int sigar_file2str(const char *fname, char *buffer, int buflen)
 
     if ((len = read(fd, buffer, buflen)) < 0) {
         status = errno;
-    }
-    else {
+    } else {
         status = SIGAR_OK;
-        buffer[len] = '\0';
     }
     close(fd);
 

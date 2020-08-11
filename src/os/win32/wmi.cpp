@@ -57,7 +57,7 @@ template <> const GUID & __mingw_uuidof < IWbemLocator * >() {
 #endif
 extern "C" {
 
-int wmi_map_sigar_error(HRESULT hres)
+int wmi_map_sigar_error(long long hres)
 {
 	switch (hres) {
 	case S_OK:

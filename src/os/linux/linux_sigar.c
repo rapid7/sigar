@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/sysmacros.h>
 #include <linux/param.h>
 #include <sys/param.h>
 #include <sys/stat.h>

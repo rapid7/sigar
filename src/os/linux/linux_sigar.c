@@ -3008,6 +3008,7 @@ static linux_vendor_info_t linux_vendors[] = {
     { "Mandrake",  "/etc/mandrake-release", NULL },
     { "VMware",    "/proc/vmware/version", NULL },
     { "XenSource", "/etc/xensource-inventory", xen_vendor_parse },
+    { "Oracle",    "/etc/oracle-release", NULL },
     { "Red Hat",   "/etc/redhat-release", redhat_vendor_parse },
     { "lsb",       "/etc/lsb-release", lsb_vendor_parse },
     { "Debian",    "/etc/debian_version", NULL },

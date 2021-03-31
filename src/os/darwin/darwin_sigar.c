@@ -2619,7 +2619,9 @@ int sigar_os_sys_info_get(sigar_t *sigar,
              "%s.%d",
              sysinfo->vendor_version, version_fix);
 
-    if (version_major == 10) {
+    if (version_major == 11) {
+        codename = "Big Sur";
+    } else if (version_major == 10) {
         switch (version_minor) {
           case 2:
             codename = "Jaguar";

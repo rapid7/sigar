@@ -40,6 +40,12 @@
 #define PROC_ERRNO ((errno == ENOENT) ? ESRCH : errno)
 #define SIGAR_USR_UCB_PS "/usr/ucb/ps"
 
+/*
+ * Hack to correctly walk the MIB2 TCP Connection structures
+ * for binaries compiled on Sparc 10 running on Sparc 11
+ */
+
+#define SOLARIS_11_MIB2_TCP_CONN_SIZE 80
 
 /* like kstat_lookup but start w/ ksp->ks_next instead of kc->kc_chain */
 static kstat_t *
@@ -2538,7 +2544,16 @@ static int tcp_connection_get(sigar_net_connection_walker_t *walker,
             }
         }
 
+#ifdef SOLARIS_10_BINARY_COMPAT
+        if (sigar->solaris_version >= 11) {
+             (char *)entry += SOLARIS_11_MIB2_TCP_CONN_SIZE;
+        }
+        else {
+             entry++;
+        }
+#else
         entry++;
+#endif
     }
 
     return SIGAR_OK;

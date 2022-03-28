@@ -2545,7 +2545,7 @@ static int tcp_connection_get(sigar_net_connection_walker_t *walker,
         }
 
 #ifdef SOLARIS_10_BINARY_COMPAT
-        if (sigar->solaris_version >= 11) {
+        if (walker->sigar->solaris_version >= 11) {
              char * next = (char *)entry + SOLARIS_11_MIB2_TCP_CONN_SIZE;
              entry = (struct mib2_tcpConnEntry *) next;
         }

@@ -41,7 +41,7 @@
 #define SIGAR_CMDLINE_MAX 4096<<2
 #endif
 
-#ifndef _MSC_VER
+#if !(defined(__MINGW32__) || defined(_MSC_VER))
 
 DEFINE_GUID(CLSID_WbemLocator, 0x4590f811, 0x1d3a, 0x11d0, 0x89, 0x1f, 0x00, 0xaa, 0x00, 0x4b, 0x2e, 0x24);
 template <> const GUID & __mingw_uuidof < IWbemLocator > () {

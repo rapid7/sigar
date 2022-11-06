@@ -29,7 +29,7 @@
 #include <nfs/rpcv2.h>
 #include <nfs/nfsproto.h>
 #include <nfs/nfs.h>
-#if (__MAC_OS_X_VERSION_MIN_REQUIRED >= 120000)
+#if (__MAC_OS_X_VERSION_MIN_REQUIRED >= 120001)
 struct nfsstats {
  	uint64_t        attrcache_hits;
  	uint64_t        attrcache_misses;

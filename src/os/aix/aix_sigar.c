@@ -27,14 +27,16 @@
 #include "sigar_private.h"
 #include "sigar_util.h"
 #include "sigar_os.h"
-
 #include <dlfcn.h>
 #include <nlist.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <utmp.h>
+#include <sys/protosw.h>
 #include <libperfstat.h>
 #include <pthread.h>
+#include <procinfo.h>
+#include <sys/types.h>
 
 #include <sys/statfs.h>
 #include <sys/systemcfg.h>
@@ -55,7 +57,6 @@
 /* for proc_port */
 #include <netinet/in_pcb.h>
 #include <sys/domain.h>
-#include <sys/protosw.h>
 #include <sys/socketvar.h>
 
 /* for net_connection_list */
@@ -77,7 +78,6 @@
 
 /* for getkerninfo */
 #include <sys/kinfo.h>
-
 /* not defined in aix 4.3 */
 #ifndef SBITS
 #define SBITS 16
@@ -97,6 +97,7 @@
 #define FIXED_TO_DOUBLE(x) (((double)x) / (1<<SBITS))
 
 /* these offsets wont change so just lookup them up during open */
+
 static int get_koffsets(sigar_t *sigar)
 {
     int i;
@@ -476,8 +477,6 @@ int sigar_swap_get(sigar_t *sigar, sigar_swap_t *swap)
 
 int sigar_cpu_get(sigar_t *sigar, sigar_cpu_t *cpu)
 {
-    int i, status;
-    struct sysinfo data;
     perfstat_cpu_total_t cpu_data;
 
     if (sigar_perfstat_cpu(&cpu_data) == 1) {
@@ -671,8 +670,7 @@ int sigar_who_list_get(sigar_t *sigar,
 int sigar_loadavg_get(sigar_t *sigar,
                       sigar_loadavg_t *loadavg)
 {
-    int status, i;
-    int data[3];
+    int i;
     perfstat_cpu_total_t cpu_data;
 
     loadavg->processor_queue = SIGAR_FIELD_NOTIMPL;
@@ -717,7 +715,7 @@ int sigar_os_proc_list_get(sigar_t *sigar,
 
 static int sigar_getprocs(sigar_t *sigar, sigar_pid_t pid)
 {
-    int status, num;
+    int num;
     time_t timenow = time(NULL);
 
     if (sigar->pinfo == NULL) {
@@ -1329,7 +1327,6 @@ int sigar_file_system_usage_get(sigar_t *sigar,
                                 const char *dirname,
                                 sigar_file_system_usage_t *fsusage)
 {
-    sigar_cache_entry_t *ent;
     struct stat sb;
     int status;
 
@@ -1374,6 +1371,7 @@ int sigar_file_system_usage_get(sigar_t *sigar,
 #define POWER_5		0x2000
 #endif
 
+/*
 static char *sigar_get_odm_model(sigar_t *sigar)
 {
     if (sigar->model[0] == '\0') {
@@ -1392,7 +1390,7 @@ static char *sigar_get_odm_model(sigar_t *sigar)
 
     return sigar->model;
 }
-
+*/
 #define SIGAR_CPU_CACHE_SIZE \
   (_system_configuration.L2_cache_size / 1024)
 
@@ -1863,6 +1861,8 @@ sigar_tcp_get(sigar_t *sigar,
     tcp->retrans_segs = 0;
     tcp->in_errs = proto.u.tcp.ierrors;
     tcp->out_rsts = 0;
+
+    return SIGAR_OK;
 }
 
 #define NFS_V2_STAT_SET(type) \

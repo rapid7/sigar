@@ -29,8 +29,7 @@
 #include <nfs/rpcv2.h>
 #include <nfs/nfsproto.h>
 #include <nfs/nfs.h>
-#ifndef NFS_NPROCS
-#if (__MAC_OS_X_VERSION_MIN_REQUIRED >= 101406)
+#if (__MAC_OS_X_VERSION_MAX_ALLOWED >= 120000)
 struct nfsstats {
  	uint64_t        attrcache_hits;
  	uint64_t        attrcache_misses;
@@ -65,7 +64,6 @@ struct nfsstats {
  	uint64_t        pageins;
  	uint64_t        pageouts;
 };
-#endif
 #endif
 #endif
 

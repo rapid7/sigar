@@ -1,0 +1,15 @@
+---
+info:
+  title: Sigar
+  description: System Information Gatherer And Reporter
+  x-cortex-git:
+    github:
+      alias: r7org
+      repository: rapid7/sigar
+  x-cortex-tag: sigar
+  x-cortex-type: service
+  x-cortex-domain-parents:
+  - tag: metasploit
+openapi: 3.0.1
+servers:
+- url: "/"

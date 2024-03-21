@@ -1028,8 +1028,10 @@ int sigar_proc_env_get(sigar_t *sigar, sigar_pid_t pid,
     }
 
     len = read(fd, buffer, sizeof(buffer));
-
     close(fd);
+    if (len < 0) {
+        return errno;
+    }
 
     buffer[len] = '\0';
     ptr = buffer;

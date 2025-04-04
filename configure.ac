@@ -1,5 +1,5 @@
 dnl ... hmm ... we have to duplicate the data below again
-AC_INIT(libsigar, 1.6.3)
+AC_INIT([libsigar],[1.6.3])
 AC_CONFIG_SRCDIR(src/sigar.c)
 dnl AC_CONFIG_HEADERS(src/config.h)
 AM_INIT_AUTOMAKE([foreign])
@@ -21,7 +21,7 @@ AC_PROG_CXX
 AC_PROG_LN_S
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_PROG_LIBTOOL
+LT_INIT
 AC_CONFIG_MACRO_DIR([m4])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -121,10 +121,8 @@ AM_CONDITIONAL(OS_HPUX, test x$SRC_OS = xhpux)
 AM_CONDITIONAL(OS_AIX, test x$SRC_OS = xaix)
 AM_CONDITIONAL(OS_SOLARIS, test x$SRC_OS = xsolaris)
 
-AC_ARG_WITH(valgrind, [AC_HELP_STRING(
-		       [--with-valgrind[=binary]],
-		       [run the tests in valgrind to check for mem-leaks]
-		       )],
+AC_ARG_WITH(valgrind, [AS_HELP_STRING([--with-valgrind[=binary]],[run the tests in valgrind to check for mem-leaks
+		       ])],
 	     [],
 	     [with_valgrind=no])
 AS_IF([test "x$with_valgrind" != xno],
@@ -139,7 +137,7 @@ AS_IF([test "x$with_valgrind" != xno],
 AM_CONDITIONAL(USE_VALGRIND, test "x$VALGRIND" != x)
 
 dnl Check for lua
-AC_ARG_WITH(lua, AC_HELP_STRING([--with-lua],[lua]),
+AC_ARG_WITH(lua, AS_HELP_STRING([--with-lua],[lua]),
 [WITH_LUA=$withval],[WITH_LUA=no])
 AC_MSG_CHECKING(if with lua)
 AS_IF([ test "x$WITH_LUA" != "xno" ],

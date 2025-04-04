@@ -91,6 +91,7 @@ TEST(test_sigar_file_system_list_get) {
 				break;
 #endif
 			case EACCES:
+			case EPERM:
 				break;
 
 			default:
